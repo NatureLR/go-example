@@ -1,0 +1,43 @@
+package main
+
+func orderType(ord Row) string {
+	src := map[string]string{
+		"hov:100001":   "饿了么",
+		"hov:100005":   "美团外卖",
+		"hov:100010":   "百度外卖",
+		"hov:100012":   "淘点点",
+		"hov:100050":   "零号线",
+		"hov:100060":   "京明管家",
+		"hov:100061":   "外卖超人",
+		"hov:100062":   "派乐趣",
+		"ext:20YxkATP": "深圳市迅享科技有限公司",
+		"ext:21JKTq7X": "renqianbo",
+		"ext:2Ou4Jekw": "速位",
+		"ext:2SsaLTS7": "漫天香小龙虾",
+		"ext:3QLMZxtL": "互联社区",
+		"ext:3nXSmCTH": "鲜急送",
+		"ext:5Zwohb5Y": "来客微信",
+		"ext:6FQz0PO0": "全微科技",
+		"ext:6RWMFtvh": "美食送",
+		"ext:6XrfAQ6h": "中欧商学院枫会",
+		"ext:7SXNGuwi": "北京汁味包子铺",
+		"ext:83QRKLnx": "云视科技",
+		"ext:9KDsG2QF": "超级小二",
+		"ext:9QFD7Dm5": "禹晨快餐",
+		"ext:9oQol3aA": "四和创想",
+		"ext:Fm3MKHVc": "来客分单",
+		"ext:KRT4xymi": "奕禾",
+		"ext:PRwAvtya": "北京笼立方",
+		"ext:aVV9MAEs": "来客微信",
+		"ext:b2tdq6qt": "车及送",
+		"ext:bApKfNJy": "来客微信",
+		"ext:btH4Djs9": "超级小二",
+		"ext:cVD4AdA9": "我快到",
+		"ext:cjeyhou":  "来客测试",
+		"ext:d5P3B44e": "疯咖",
+		"ext:fQoIJnow": "疯咖",
+		"ext:tFOJLiFM": "微信系统支付",
+		"ext:utYsBQtp": "侠刻送",
+	}
+	return src[ord["src"]]
+}
