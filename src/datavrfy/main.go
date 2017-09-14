@@ -16,7 +16,6 @@ import (
 type opdata struct {
 	total      string
 	pay_amount string
-	payment_id string
 }
 type localdata struct {
 	total      string
@@ -51,8 +50,8 @@ func getoids(f string) []string {
 	}
 	return oids
 }
-func dbquery(orderid []string) map[string]opdata {
-	dbdata := make(map[string]opdata)
+func dbquery(orderid []string) map[string]map[string]opdata {
+	dbdata := make(map[string]map[string]opdata)
 	dsns := []string{
 		"shop-01-ro-01:KaIL0BkKGuPfLTiC@tcp(unit-sql-01.paadoo.net:3306)/shop",
 		"shop-02-ro-01:Me1ftRCV23LVe7Vo@tcp(unit-sql-02.paadoo.net:3306)/shop",
@@ -78,17 +77,19 @@ func dbquery(orderid []string) map[string]opdata {
 		assert(err)
 		data := FetchRows(re)
 		for _, r := range data {
-			dbdata[r["order_id"]] = opdata{
+			if dbdata[r["order_id"]] == nil {
+				dbdata[r["order_id"]] = make(map[string]opdata)
+			}
+			dbdata[r["order_id"]][r["payment_id"]] = opdata{
 				total:      r["total"],
 				pay_amount: r["pay_amount"],
-				payment_id: r["payment_id"],
 			}
 		}
 	}
 	return dbdata
 }
 
-func ComparePayment(file string) {
+/*func ComparePayment(file string) {
 	ldb := readfile(file)
 	dbd := dbquery(getoids(file))
 	fmt.Println("order_id,total,pay_amount,variance,payment_id,toal,pay_amount")
@@ -102,7 +103,7 @@ func ComparePayment(file string) {
 			fmt.Printf("%s,%s,%s,%s,%s,%s,%s\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, dbd[oid].payment_id, dbd[oid].total, dbd[oid].pay_amount)
 		}
 	}
-}
+}*/
 
 func main() {
 	ver := flag.Bool("version", false, "show version info")
@@ -116,5 +117,27 @@ func main() {
 		fmt.Println("没有文件 请查看-h")
 		return
 	}
-	ComparePayment(*file)
+
+	ldb := readfile(*file)
+	dbd := dbquery(getoids(*file))
+	fmt.Println("order_id,total,pay_amount,variance,payment_id,toal,pay_amount")
+	for _, oid := range getoids(*file) {
+		if oid == "id" {
+			continue
+		}
+		if len(dbd[oid]) > 1 { //一个order_id 多个payment
+			for pid, v := range dbd[oid] {
+				fmt.Printf("%s,%s,%s,%s,%s,%s,%s\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, pid, v.total, v.pay_amount)
+			}
+		} else { //一个order_ID单个paymentID
+			for pid, v := range dbd[oid] {
+				if ldb[oid].total == v.total && ldb[oid].pay_amount == v.pay_amount {
+					fmt.Printf("%s,%s,%s,%s,%s,%s,%s,√\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, pid, v.total, v.pay_amount)
+				} else {
+					fmt.Printf("%s,%s,%s,%s,%s,%s,%s\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, pid, v.total, v.pay_amount)
+				}
+				fmt.Println(oid, pid, v.total, v.pay_amount)
+			}
+		}
+	}
 }
