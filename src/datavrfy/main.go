@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	//	"encoding/csv"
 	"bufio"
 	"flag"
@@ -50,64 +49,11 @@ func getoids(f string) []string {
 	}
 	return oids
 }
-func dbquery(orderid []string) map[string]map[string]opdata {
-	dbdata := make(map[string]map[string]opdata)
-	dsns := []string{
-		"shop-01-ro-01:KaIL0BkKGuPfLTiC@tcp(unit-sql-01.paadoo.net:3306)/shop",
-		"shop-02-ro-01:Me1ftRCV23LVe7Vo@tcp(unit-sql-02.paadoo.net:3306)/shop",
-		"shop-03-ro-01:QBSH5KOFsdsC6Cc8@tcp(unit-sql-03.paadoo.net:3306)/shop",
-		"shop-04-ro-01:v2OwExSyuqGBZ1GJ@tcp(unit-sql-04.paadoo.net:3306)/shop",
-	}
-	for _, dsn := range dsns {
-		db, err := sql.Open("mysql", dsn)
-		assert(err)
-		qry := `SELECT DISTINCT
-				o.id AS order_id,
-				p.id AS payment_id,
-				o.amount AS total,
-				p.paid AS pay_amount 
-			FROM
-				orders o
-				INNER JOIN one_order oo ON o.id = oo.order_id
-				INNER JOIN order_payment op ON op.one_order_id = oo.id
-				INNER JOIN payment p ON p.id = op.payment_id 
-			WHERE
-			o.id in ('` + strings.Join(orderid, "','") + `')`
-		re, err := db.Query(qry)
-		assert(err)
-		data := FetchRows(re)
-		for _, r := range data {
-			if dbdata[r["order_id"]] == nil {
-				dbdata[r["order_id"]] = make(map[string]opdata)
-			}
-			dbdata[r["order_id"]][r["payment_id"]] = opdata{
-				total:      r["total"],
-				pay_amount: r["pay_amount"],
-			}
-		}
-	}
-	return dbdata
-}
-
-/*func ComparePayment(file string) {
-	ldb := readfile(file)
-	dbd := dbquery(getoids(file))
-	fmt.Println("order_id,total,pay_amount,variance,payment_id,toal,pay_amount")
-	for _, oid := range getoids(file) {
-		if oid == "id" {
-			continue
-		}
-		if ldb[oid].total == dbd[oid].total && ldb[oid].pay_amount == dbd[oid].pay_amount {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s,√\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, dbd[oid].payment_id, dbd[oid].total, dbd[oid].pay_amount)
-		} else {
-			fmt.Printf("%s,%s,%s,%s,%s,%s,%s\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, dbd[oid].payment_id, dbd[oid].total, dbd[oid].pay_amount)
-		}
-	}
-}*/
 
 func main() {
 	ver := flag.Bool("version", false, "show version info")
-	file := flag.String("f", "test.csv", "要比对的文件")
+	file := flag.String("f", "", "要比对的文件")
+	tp := flag.String("t", "", "payment:比对payment,item比对Orderitem")
 	flag.Parse()
 	if *ver {
 		fmt.Println(verinfo())
@@ -117,27 +63,11 @@ func main() {
 		fmt.Println("没有文件 请查看-h")
 		return
 	}
-
-	ldb := readfile(*file)
-	dbd := dbquery(getoids(*file))
-	fmt.Println("order_id,total,pay_amount,variance,payment_id,toal,pay_amount")
-	for _, oid := range getoids(*file) {
-		if oid == "id" {
-			continue
-		}
-		if len(dbd[oid]) > 1 { //一个order_id 多个payment
-			for pid, v := range dbd[oid] {
-				fmt.Printf("%s,%s,%s,%s,%s,%s,%s\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, pid, v.total, v.pay_amount)
-			}
-		} else { //一个order_ID单个paymentID
-			for pid, v := range dbd[oid] {
-				if ldb[oid].total == v.total && ldb[oid].pay_amount == v.pay_amount {
-					fmt.Printf("%s,%s,%s,%s,%s,%s,%s,√\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, pid, v.total, v.pay_amount)
-				} else {
-					fmt.Printf("%s,%s,%s,%s,%s,%s,%s\n", oid, ldb[oid].total, ldb[oid].pay_amount, ldb[oid].variance, pid, v.total, v.pay_amount)
-				}
-				fmt.Println(oid, pid, v.total, v.pay_amount)
-			}
-		}
+	if *tp == "payment" {
+		ComparePayment(*file)
+	} else if *tp == "item" {
+		CompareItem(*file)
+	} else {
+		fmt.Println("请-h查看帮助")
 	}
 }
