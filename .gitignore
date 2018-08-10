@@ -1,2 +1,7 @@
 git.likeit.cn
 github.com
+.vscode/
+bin/
+git.likeit.cn
+gopkg.in
+pkg/
