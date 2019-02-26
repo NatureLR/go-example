@@ -3,123 +3,21 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"expvar"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"strings"
 	"time"
+
+	"git.likeit.cn/go/audit"
+	"git.likeit.cn/go/aux"
 )
 
-//http相关功能测试 文件
-func getCache() {
-	url := fmt.Sprintf("http://localhost:3852/shop_parent")
-	fmt.Println("getCache:", url)
-	hc := http.Client{Timeout: 10 * time.Second}
-	resp, err := hc.Get(url)
-	assert(err)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp.Status)
-	}
-	var bb bytes.Buffer
-	io.Copy(&bb, resp.Body)
-
-	var data map[string]map[string]string
-
-	/*jd := json.NewDecoder(resp.Body)
-	err=jd.Decode(&data)
-	assert(err)*/
-
-	buf := bb.Bytes()
-	e := json.Unmarshal(buf, &data)
-	if e != nil {
-		fmt.Println(e)
-		fmt.Println(len(buf), string(buf))
-		return
-	}
-	return
-}
-
-type tableInfo struct {
-	Domain    string
-	Source    string
-	Name      string
-	DataCount int
-	DataSize  int
-	Mode      string
-}
-
-type mobiusJob struct {
-	Table       tableInfo
-	Storage     string
-	JobID       int
-	Type        string
-	Submitted   time.Time
-	Completed   time.Time
-	Elapsed     float64
-	Status      string
-	TotalTasks  int
-	ActiveTasks int
-}
-
-//"http://123.59.135.51:23779/jobs?status=SUCCEEDED"
-func getSparkStatus() (idle bool) {
-	url := fmt.Sprintf("http://123.59.135.51:23779/jobs?type=VIEW")
-	defer func() {
-		if e := recover(); e != nil {
-			fmt.Println("ERROR:", e.(error).Error())
-			time.Sleep(time.Minute)
-			idle = true
-		}
-	}()
-	type mobiusJob struct {
-		Table struct {
-			Name   string
-			Domain string
-		}
-		Submitted time.Time
-		Elapsed   float64
-	}
-	url = fmt.Sprintf("http://%s:%s/jobs?type=VIEW")
-	hc := http.Client{Timeout: 10 * time.Second}
-	resp, err := hc.Get(url)
-	assert(err)
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		panic(fmt.Errorf(resp.Status))
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	assert(err)
-	var sparkStatus []mobiusJob
-	assert(json.Unmarshal(body, &sparkStatus))
-	for _, s := range sparkStatus {
-		if s.Table.Domain == "likeitbi" {
-			fmt.Printf("SPARK BUSY: table=%s; started=%v elapsed=%f\n",
-				s.Table.Name, s.Submitted, s.Elapsed)
-			return false
-		}
-	}
-	return true
-}
-
-type HeartBeat time.Time
-
-func (hb *HeartBeat) String() string {
-	return `"` + time.Time(*hb).Format(time.RFC3339Nano) + `"`
-}
-
-var (
-	SELF string
-	HB   HeartBeat
-)
-
-func http_server() {
+//http路由
+func startServers() {
+	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/test/", testHandler)
+
 	svr := http.Server{
-		Addr:         ":9658",
+		Addr:         ":" + "8080",
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
@@ -127,31 +25,70 @@ func http_server() {
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
-	a := args(r)
-	for k, v := range a {
-		fmt.Println(k, v)
-	}
+	apiErr(w, "")
+	apiOk(w, "")
 }
 
-func args(r *http.Request) []string {
-	ps := strings.Split(r.URL.Path, "/")
-	for i := len(ps) - 1; i > 0; i-- {
-		if ps[i] != "" {
-			return ps[2 : i+1]
+//统一返回结构
+func apiOk(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	enc := json.NewEncoder(w)
+	audit.Assert(enc.Encode(map[string]interface{}{
+		"stat": 0,
+		"msg":  "请求成功",
+		"data": data,
+	}))
+}
+
+func apiErr(w http.ResponseWriter, msg string) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	enc := json.NewEncoder(w)
+	audit.Assert(enc.Encode(map[string]interface{}{
+		"stat": 1,
+		"msg":  msg,
+	}))
+}
+
+//结构体方式
+type APIReply struct {
+	Code int         `json:"code"`
+	Data interface{} `json:"data"`
+	Msg  string      `json:"msg"`
+}
+
+func Reply(w http.ResponseWriter, r *http.Request) (trcid string, reply func()) {
+	trcid = aux.UUID(8)
+	Dbg(trcid, "%s => %s", r.RemoteAddr, r.URL.Path)
+	reply = func() {
+		var ar *APIReply
+		e := recover()
+		switch e.(type) {
+		case *APIReply:
+			ar = e.(*APIReply)
+		case nil:
+			ar = &APIReply{Code: 0}
+		default:
+			ar = &APIReply{Code: 100, Msg: fmt.Sprintf("%v", e)} //generic error
 		}
+		if ar.Data == nil {
+			ar.Data = map[string]string{}
+		}
+		Dbg(trcid, ar.Error())
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		fmt.Fprintln(w, ar.Error())
 	}
-	return nil
+	return
 }
 
-func sysInit(p string) {
+func (ar *APIReply) Error() string {
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(ar)
+	return buf.String()
+}
 
-	expvar.NewString("epoch").Set(time.Now().Format(time.RFC3339))
-	expvar.NewString("version").Set(_G_REVS + "." + _G_HASH)
-	expvar.NewInt("pid").Set(int64(os.Getpid()))
-	svr := http.Server{
-		Addr:         ":" + p,
-		ReadTimeout:  time.Minute,
-		WriteTimeout: time.Minute,
+func Ret(ar *APIReply) {
+	if ar == nil {
+		panic(&APIReply{Code: 0})
 	}
-	assert(svr.ListenAndServe())
+	panic(ar)
 }

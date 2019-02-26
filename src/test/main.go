@@ -12,5 +12,4 @@ func main() {
 		fmt.Println(verinfo())
 		return
 	}
-
 }

@@ -4,62 +4,55 @@ import (
 	"database/sql"
 	"fmt"
 
-	"git.likeit.cn/go/audit"
-	"git.likeit.cn/go/aux"
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
 
-func init() {
+//初始化数据库
+func initDB() {
 	d, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/test?charset=utf8&sql_mode=ANSI_QUOTES&allowAllFiles=true")
 	assert(err)
 	db = d
 }
 
-//从mysql数据库中读取数据
-func getData() {
-	rows, err := db.Query("SELECT * FROM $policy")
-	audit.Assert(err)
-
-	/*for _, r := range aux.FetchRows(rows) {
-		fmt.Println(r["id"])
-	}
-
-	aux.RangeRows(rows, func() {
-		var f string
-		rows.Scan(&f)
-	})
-
-	var count int
-	test := func(r map[string]interface{}) bool {
-
-		if count == 10 {
-			return false
-		}
-		return true
-	}
-	aux.IterRows(rows, test)*/
-
-	IterRowsLimit(rows, 10, func(r map[string]interface{}) {
-		fmt.Println(r["id"])
-	})
+//创建数据库表
+func createTable() {
+	_, err := db.Exec(`
+	CREATE TABLE IF NOT EXISTS test (
+		id int(11) NOT NULL AUTO_INCREMENT,
+		created datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT '创建时间',
+		updated datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6) COMMENT '更新时间',
+		PRIMARY KEY (shop_id, module)
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='进度控制'
+	`)
+	assert(err)
 }
 
-type proc func(map[string]interface{})
-
-func IterRowsLimit(rows *sql.Rows, batch int, p proc) {
-	var count int
-	obj := func(r map[string]interface{}) bool {
-		p(r)
-		if count == batch {
-			return false
-		}
-		count++
-		return true
+//从mysql数据库中读取数据
+func getData() {
+	//适合有不知道那些字段或者字段很多情况
+	rows, err := db.Query("SELECT * FROM test")
+	assert(err)
+	for _, r := range FetchRows(rows) {
+		fmt.Println(r["id"])
 	}
-	aux.IterRows(rows, obj)
+
+	//适合有明确字段拿出来的情况
+	rows, err = db.Query("SELECT id,created FROM test")
+	RangeRows(rows, func() {
+		var id string
+		var create sql.NullString
+		rows.Scan(&id, &create)
+		if create.Valid {
+			fmt.Println(id, create.String)
+		}
+	})
+
+	//适合只有一条数据的情况
+	var id sql.NullString //此对象为空时不会报错
+	assert(db.QueryRow(`SELECT id FROM test`).Scan(&id))
 }
 
 //将本地文件导入到mysql中
@@ -68,8 +61,8 @@ func lif() {
 	filePath := "/home/zxz/git/test/src/test/test.csv"
 	mysql.RegisterLocalFile(filePath)
 	stmt := `LOAD DATA LOCAL INFILE '` + filePath + `' INTO TABLE bdp_orders
-	CHARACTER SET utf8  fields terminated by ',' enclosed by '"' ` + format
-	fmt.Println(stmt)
+	CHARACTER SET utf8 fields terminated by ',' enclosed by '"' ` + format
+
 	_, err := db.Exec(stmt)
 	assert(err)
 	return
