@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"git.likeit.cn/go/audit"
 )
 
 //http路由
@@ -32,7 +30,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 func apiOk(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	enc := json.NewEncoder(w)
-	audit.Assert(enc.Encode(map[string]interface{}{
+	assert(enc.Encode(map[string]interface{}{
 		"stat": 0,
 		"msg":  "请求成功",
 		"data": data,
@@ -42,7 +40,7 @@ func apiOk(w http.ResponseWriter, data interface{}) {
 func apiErr(w http.ResponseWriter, msg string) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	enc := json.NewEncoder(w)
-	audit.Assert(enc.Encode(map[string]interface{}{
+	assert(enc.Encode(map[string]interface{}{
 		"stat": 1,
 		"msg":  msg,
 	}))
