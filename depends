@@ -15,7 +15,5 @@
 # Following are sample dependencies, modify as appropriate.
 github.com/go-sql-driver/mysql
 github.com/garyburd/redigo/redis
-git@git.likeit.cn:github.com/go-sql-driver_mysql release
-git@git.likeit.cn:go/audit
-http://git.likeit.cn/go/aux
-git@git.likeit.cn:go/pfs-cli
+https://github.com/go-sql-driver/mysql
+https://github.com/xrfang/go-audit

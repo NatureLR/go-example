@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"git.likeit.cn/go/audit"
-	"git.likeit.cn/go/aux"
 )
 
 //http路由
@@ -57,7 +56,7 @@ type APIReply struct {
 }
 
 func Reply(w http.ResponseWriter, r *http.Request) (trcid string, reply func()) {
-	trcid = aux.UUID(8)
+	trcid = UUID(8)
 	Dbg(trcid, "%s => %s", r.RemoteAddr, r.URL.Path)
 	reply = func() {
 		var ar *APIReply
