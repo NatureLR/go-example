@@ -276,10 +276,15 @@ func run(args ...string) (err error) {
 	}
 	cmd.Env = append(cmd.Env, "GOPATH="+PROJ_ROOT)
 	if args[0] == "go" && args[1] == "build" {
-		if CMD == "win" {
+		switch CMD {
+		case "win":
 			cmd.Env = append(cmd.Env, "GOOS=windows")
-		} else if CMD == "arm" {
+		case "linux":
+			cmd.Env = append(cmd.Env, "GOOS=linux")
+		case "arm":
 			cmd.Env = append(cmd.Env, "GOARCH=arm", "GOARM=7")
+		case "darwin":
+			cmd.Env = append(cmd.Env, "GOOS=darwin")
 		}
 		cmd.Env = append(cmd.Env, bc.EXTRA_ENVIRON...)
 	}
