@@ -1,4 +1,4 @@
-package main
+package tools
 
 import (
 	"fmt"
@@ -24,17 +24,6 @@ func sortArr(arr []int, size int) []int {
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-}
-
-func UUID(n int) string {
-	charmap := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	b := make([]byte, n)
-	rand.Read(b)
-	for i := 0; i < n; i++ {
-		r := b[i] % 62
-		b[i] = charmap[r]
-	}
-	return string(b)
 }
 
 func fmtTime(ts string) string {

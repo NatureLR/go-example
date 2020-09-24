@@ -1,6 +1,7 @@
-package main
+package databases
 
 import (
+	"NatureLingRan/go-test/pkg/errors"
 	"database/sql"
 	"fmt"
 
@@ -13,7 +14,7 @@ var db *sql.DB
 //初始化数据库
 func initDB() {
 	d, err := sql.Open("mysql", "root:root@tcp(localhost:3306)/test?charset=utf8&sql_mode=ANSI_QUOTES&allowAllFiles=true")
-	assert(err)
+	errors.Check(err)
 	db = d
 }
 
@@ -27,14 +28,14 @@ func createTable() {
 		PRIMARY KEY (shop_id, module)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='进度控制'
 	`)
-	assert(err)
+	errors.Check(err)
 }
 
 //从mysql数据库中读取数据
 func getData() {
 	//适合有不知道那些字段或者字段很多情况
 	rows, err := db.Query("SELECT * FROM test")
-	assert(err)
+	errors.Check(err)
 	for _, r := range FetchRows(rows) {
 		fmt.Println(r["id"])
 	}
@@ -52,7 +53,7 @@ func getData() {
 
 	//适合只有一条数据的情况
 	var id sql.NullString //此对象为空时不会报错
-	assert(db.QueryRow(`SELECT id FROM test`).Scan(&id))
+	errors.Check(db.QueryRow(`SELECT id FROM test`).Scan(&id))
 }
 
 //将本地文件导入到mysql中
@@ -64,7 +65,7 @@ func lif() {
 	CHARACTER SET utf8 fields terminated by ',' enclosed by '"' ` + format
 
 	_, err := db.Exec(stmt)
-	assert(err)
+	errors.Check(err)
 	return
 	//DSN加上allowAllFiles=true
 	//fields关键字指定了文件记段的分割格式，如果用到这个关键字，MySQL剖析器希望看到至少有下面的一个选项：

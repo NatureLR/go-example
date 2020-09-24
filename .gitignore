@@ -1,7 +1,3 @@
-.vscode/
-bin/*
-git.likeit.cn
-github.com
-gopkg.in
-pkg/
-src/test/test
+go-test
+.vscode
+bin

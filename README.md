@@ -1,2 +1,1 @@
-# test
-学习测试
+# go-test

@@ -1,0 +1,35 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-test
+spec:
+  selector:
+    matchLabels:
+      app: go-test
+  template:
+    metadata:
+      labels:
+        app: go-test
+    spec:
+      containers:
+      - name: go-test
+        # 此处需要替换为docker镜像地址
+        image: <Image>
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        #ports:
+        #- containerPort: <Port>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-test
+spec:
+  selector:
+    app: go-test
+  ports:
+  #- port: <Port>
+  #  targetPort: <Target Port>

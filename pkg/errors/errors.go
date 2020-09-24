@@ -1,4 +1,4 @@
-package main
+package errors
 
 import (
 	"fmt"
@@ -6,7 +6,13 @@ import (
 	"strings"
 )
 
-func assert(err error) {
+func Check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func Assert(err error) {
 	if err != nil {
 		panic(err)
 	}

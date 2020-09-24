@@ -1,6 +1,7 @@
-package main
+package http
 
 import (
+	"NatureLingRan/go-test/pkg/errors"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -18,7 +19,7 @@ func startServers() {
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
-	assert(svr.ListenAndServe())
+	errors.Check(svr.ListenAndServe())
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +31,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 func apiOk(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	enc := json.NewEncoder(w)
-	assert(enc.Encode(map[string]interface{}{
+	errors.Check(enc.Encode(map[string]interface{}{
 		"stat": 0,
 		"msg":  "请求成功",
 		"data": data,
@@ -40,7 +41,7 @@ func apiOk(w http.ResponseWriter, data interface{}) {
 func apiErr(w http.ResponseWriter, msg string) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	enc := json.NewEncoder(w)
-	assert(enc.Encode(map[string]interface{}{
+	errors.Check(enc.Encode(map[string]interface{}{
 		"stat": 1,
 		"msg":  msg,
 	}))

@@ -1,6 +1,7 @@
-package main
+package databases
 
 import (
+	"NatureLingRan/go-test/pkg/errors"
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -21,7 +22,7 @@ func RangeRows(rows *sql.Rows, proc func()) {
 	for rows.Next() {
 		proc()
 	}
-	assert(rows.Err())
+	errors.Check(rows.Err())
 }
 
 func FetchRows(rows *sql.Rows) Rows {
@@ -32,7 +33,7 @@ func FetchRows(rows *sql.Rows) Rows {
 		}
 	}()
 	cols, err := rows.Columns()
-	assert(err)
+	errors.Check(err)
 	raw := make([][]byte, len(cols))
 	ptr := make([]interface{}, len(cols))
 	for i, _ := range raw {
@@ -40,7 +41,7 @@ func FetchRows(rows *sql.Rows) Rows {
 	}
 	var recs Rows
 	for rows.Next() {
-		assert(rows.Scan(ptr...))
+		errors.Check(rows.Scan(ptr...))
 		rec := make(Row)
 		for i, r := range raw {
 			if r == nil {
@@ -51,6 +52,6 @@ func FetchRows(rows *sql.Rows) Rows {
 		}
 		recs = append(recs, rec)
 	}
-	assert(rows.Err())
+	errors.Check(rows.Err())
 	return recs
 }
