@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/NatureLingRan/go-test/app"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,7 +20,7 @@ var rootCmd = &cobra.Command{
 	Long:  "跨行的长说明",
 	Run: func(cmd *cobra.Command, Args []string) {
 		//程序的入口
-		fmt.Println("Hellow World")
+		app.Run()
 	},
 	Version: versionString(),
 }

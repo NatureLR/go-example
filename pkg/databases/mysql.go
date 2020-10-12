@@ -1,10 +1,10 @@
 package databases
 
 import (
-	"NatureLingRan/go-test/pkg/errors"
 	"database/sql"
 	"fmt"
 
+	"github.com/NatureLingRan/go-test/pkg/errors"
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 )

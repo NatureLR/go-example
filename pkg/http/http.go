@@ -1,12 +1,13 @@
 package http
 
 import (
-	"NatureLingRan/go-test/pkg/errors"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/NatureLingRan/go-test/pkg/errors"
 )
 
 //http路由
