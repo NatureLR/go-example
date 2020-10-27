@@ -11,7 +11,7 @@ func Run() {
 		fmt.Fprintln(w, "pong")
 	})
 	svr := http.Server{
-		Addr:         ":9090",
+		Addr:         ":8080",
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
