@@ -44,7 +44,7 @@ func client() {
 	fmt.Println(string(buf[:n]))
 }
 
-func sock() {
+func main() {
 	t := flag.String("t", "", "")
 	flag.Parse()
 	if *t == "s" {
