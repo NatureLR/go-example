@@ -1,4 +1,4 @@
-package binarytree
+package main
 
 import "fmt"
 
@@ -118,7 +118,7 @@ func CreateNode(v int) *Node {
 	return &Node{Value: v}
 }
 
-func Run() {
+func main() {
 
 	root := Node{Value: 3}
 	root.Left = &Node{}

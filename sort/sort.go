@@ -1,7 +1,9 @@
-package sort
+package main
+
+import "fmt"
 
 //冒泡排序
-func main(arr []int, size int) []int {
+func sortArr(arr []int, size int) []int {
 	for i := 0; i < size; i++ {
 		for j := 0; j < (size - 1 - i); j++ {
 			if arr[j] > arr[j+1] {
@@ -12,4 +14,8 @@ func main(arr []int, size int) []int {
 		}
 	}
 	return arr
+}
+
+func main() {
+	fmt.Println(sortArr([]int{1, 5, 6}, 3))
 }
