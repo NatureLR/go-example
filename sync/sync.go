@@ -8,7 +8,7 @@ import (
 
 var sharedRsc = false
 
-func Sync() {
+func main() {
 
 	var wg sync.WaitGroup
 	wg.Add(2)
