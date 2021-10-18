@@ -1,0 +1,25 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: validation-example
+  labels:
+    app: admission-example
+webhooks:
+  - name: admission-example.naturelr.cc
+    clientConfig:
+      service:
+        name: admission-example
+        namespace: admission-example
+        path: "/validate"
+        port: 8080
+      caBundle: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN2akNDQWFZQ0NRQ25FQlRyUmduMDB6QU5CZ2txaGtpRzl3MEJBUXNGQURBaE1Rc3dDUVlEVlFRR0V3SkQKVGpFU01CQUdBMVVFQXd3SlkyRjBkR3hsTFdOaE1CNFhEVEl4TURVd056QTVOVGcwTkZvWERUTXhNRFV3TlRBNQpOVGcwTkZvd0lURUxNQWtHQTFVRUJoTUNRMDR4RWpBUUJnTlZCQU1NQ1dOaGRIUnNaUzFqWVRDQ0FTSXdEUVlKCktvWklodmNOQVFFQkJRQURnZ0VQQURDQ0FRb0NnZ0VCQUt4TDJGZHZRMGI1c1UyZUtYZUo1TDJtYU9EZXpyNmsKMysyeEtvZXVTc053TzlMU09idVNqWi9VWXl4MnVEQmhKd1FwNFJnZGQyYW9lSERpakpqLzV4YktuNGFyYnRZVgptaVVRSmZnaVVLQ252NVh4UEwvZVl4RGJYZHc2b0F5Nkp0NHp1N3hWU0NIeDhDZ0h1TFFwWENVYnVLTWdIWXhlCkpQVjB1RG1WOVBIZVo4MmpLNHgwbkRHOGdWY2x1K1ZQV2d6a3VOK2NOb1RxZkszS2VGUXczSDkzSU1QN2JrbGMKdG5XRGlOV1VmSzExZTZiamhWbWI3OUFpVm83RFJ1WlJlYUM4RldDcE1BeDQwMlduRStQMkNoRDNaMlBmdXdwaQozbFI4QXBZZ2ZwWWp3VTdUQnRSYVcxRVExdUx1YmNZMndxWGpPZURaMnBnWVUxWU5LZmRnMktrQ0F3RUFBVEFOCkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQWFkVzNGc0c5R08zSFVwWkQrdVZ2RXBBekE0d3k2cGhRQ0R0WURQL2EKdDBGWDRlRmI1cE14TEhPcE5uZjNVNW1XbEdpN1h2RGsrYUtIMEZwUFpacmVQRVJpRUR1SUJ4dnpDd2IwOWo3OApVVmYwV2poOG1jU1hybXN3WXVtbS9xZXdTR29WUW1rRFg2OFh3ZjFiT2E2QXZMTlgzVDd4NFJZamlPSVkydVA4CnRBMHNuMUFDbkJXdDR0QWFZMHA0d2lTcnkvZzFNelNqTk9QMkh5cHdxT0dPSlA5TEtpektpaVg4V1lhYjdhck8KcCsvaFRxZGUzNTRDazJJZ05qWWlXRGNGZlV6YmZuZlNXNTV1eWdpNHRBLzV6cWNRMmZBN2hNaS9HNFRDdXpQVwp5clZYRjY3a2FDbTdhWksySlY1NS9VVFMrQWk5QVp3dGcvMWlyNVFJaUdaZlpRPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo="
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: ["apps", ""]
+        apiVersions: ["v1"]
+        resources: ["deployments","services"]
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    namespaceSelector:
+      matchLabels:
+        admission-webhook-example: enabled

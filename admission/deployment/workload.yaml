@@ -1,0 +1,134 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    admission-webhook-example: enabled
+  name: admission-example
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admission-example
+  namespace: admission-example
+spec:
+  selector:
+    matchLabels:
+      app: admission-example
+  template:
+    metadata:
+      labels:
+        app: admission-example
+    spec:
+      containers:
+      - command:
+        - ./admission-example
+        - -key=/root/ssl/key.pem
+        - -cert=/root/ssl/cert.pem
+        image: hub.ucloudadmin.com/test-zxz/admission-example:latest
+        imagePullPolicy: Always
+        name: admission-example
+        ports:
+        - containerPort: 9658
+          name: 9658tcp2
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        volumeMounts:
+        - mountPath: /root/ssl
+          name: vol1
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 256
+          name: cert
+          optional: false
+        name: vol1
+---
+apiVersion: v1
+data:
+  cert.pem: |-
+    -----BEGIN CERTIFICATE-----
+    MIIDqjCCApKgAwIBAgIJAIjVrIj1BRwuMA0GCSqGSIb3DQEBCwUAMCExCzAJBgNV
+    BAYTAkNOMRIwEAYDVQQDDAljYXR0bGUtY2EwHhcNMjEwNTA3MDk1ODQ0WhcNMzEw
+    NTA1MDk1ODQ0WjBNMQswCQYDVQQGEwJDTjE+MDwGA1UEAww1YWRtaXNzaW9uLWV4
+    YW1wbGUuYWRtaXNzaW9uLWV4YW1wbGUuc3ZjLmNsdXN0ZXIubG9jYWwwggEiMA0G
+    CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCv1axxJTtyMfnyz4EZMrFMOCHnN6mr
+    pXDGKpB84s+ugIgfiHrnkDnh7MT/JlRpR4KA50aNbxBXz/vA9H8pRRkj7ubFH8bV
+    cuHSa8GpG/TntokssLXToaWNVTz8IfslO9JsZF9/I8Q8XikVWcebhNmWSk4NdHN1
+    0LAXIknA9rgE+F6fjRrL+OkOwgSFwJseOS5OcCRlgUZ3gu+Pvv+eF7rLXC3mQUu8
+    Qw3d96J2QowzWeJIWJoX0hcgQzs0CEgb9XbXwSk8X+VOWnNBEv/MPjIZPkwdANZU
+    8Z0rvl3uH1TJS+yuy8nRzVFZf12EANMEQRA2pL1Y1qh92TkYBHGGYunLAgMBAAGj
+    gbgwgbUwCQYDVR0TBAIwADALBgNVHQ8EBAMCBeAwHQYDVR0lBBYwFAYIKwYBBQUH
+    AwIGCCsGAQUFBwMBMHwGA1UdEQR1MHOCEWFkbWlzc2lvbi1leGFtcGxlgidhZG1p
+    c3Npb24tZXhhbXBsZS5hZG1pc3Npb24tZXhhbXBsZS5zdmOCNWFkbWlzc2lvbi1l
+    eGFtcGxlLmFkbWlzc2lvbi1leGFtcGxlLnN2Yy5jbHVzdGVyLmxvY2FsMA0GCSqG
+    SIb3DQEBCwUAA4IBAQBvA5TbJkACEXEzFhZzepCF8XyQ9VB72WloHuRyn8KB7oWt
+    0Z0uVvLDY6fHpu14qm2eBWgT3gvF5Agi8Mhl0pd6xmRzEBQ5kb952UHo4tza+oJJ
+    Virfu3xh5t6DbvQ2e9nRIHWdH0+3yeoyMCR+KYduPMiPy7HQmA99MU5846CebTzT
+    78ffEL8PUXYL3aAB4qEUwvu8K0ogq10ow/G5t6mGfnBCqWuhhwwIlgbDU9VoR+V9
+    IoQkvtuDpu6JeywU5g5AUxYovGHvDPiCu30UiWe/2B6CH3ngE70bi8/lLMGAjpKN
+    TQB465/stiOOLZ4HFbzBX2mn2/s7S6YCFgC9+49U
+    -----END CERTIFICATE-----
+    -----BEGIN CERTIFICATE-----
+    MIICvjCCAaYCCQCnEBTrRgn00zANBgkqhkiG9w0BAQsFADAhMQswCQYDVQQGEwJD
+    TjESMBAGA1UEAwwJY2F0dGxlLWNhMB4XDTIxMDUwNzA5NTg0NFoXDTMxMDUwNTA5
+    NTg0NFowITELMAkGA1UEBhMCQ04xEjAQBgNVBAMMCWNhdHRsZS1jYTCCASIwDQYJ
+    KoZIhvcNAQEBBQADggEPADCCAQoCggEBAKxL2FdvQ0b5sU2eKXeJ5L2maODezr6k
+    3+2xKoeuSsNwO9LSObuSjZ/UYyx2uDBhJwQp4Rgdd2aoeHDijJj/5xbKn4arbtYV
+    miUQJfgiUKCnv5XxPL/eYxDbXdw6oAy6Jt4zu7xVSCHx8CgHuLQpXCUbuKMgHYxe
+    JPV0uDmV9PHeZ82jK4x0nDG8gVclu+VPWgzkuN+cNoTqfK3KeFQw3H93IMP7bklc
+    tnWDiNWUfK11e6bjhVmb79AiVo7DRuZReaC8FWCpMAx402WnE+P2ChD3Z2Pfuwpi
+    3lR8ApYgfpYjwU7TBtRaW1EQ1uLubcY2wqXjOeDZ2pgYU1YNKfdg2KkCAwEAATAN
+    BgkqhkiG9w0BAQsFAAOCAQEAadW3FsG9GO3HUpZD+uVvEpAzA4wy6phQCDtYDP/a
+    t0FX4eFb5pMxLHOpNnf3U5mWlGi7XvDk+aKH0FpPZZrePERiEDuIBxvzCwb09j78
+    UVf0Wjh8mcSXrmswYumm/qewSGoVQmkDX68Xwf1bOa6AvLNX3T7x4RYjiOIY2uP8
+    tA0sn1ACnBWt4tAaY0p4wiSry/g1MzSjNOP2HypwqOGOJP9LKizKiiX8WYab7arO
+    p+/hTqde354Ck2IgNjYiWDcFfUzbfnfSW55uygi4tA/5zqcQ2fA7hMi/G4TCuzPW
+    yrVXF67kaCm7aZK2JV55/UTS+Ai9AZwtg/1ir5QIiGZfZQ==
+    -----END CERTIFICATE-----
+  key.pem: |-
+    -----BEGIN RSA PRIVATE KEY-----
+    MIIEowIBAAKCAQEAr9WscSU7cjH58s+BGTKxTDgh5zepq6VwxiqQfOLProCIH4h6
+    55A54ezE/yZUaUeCgOdGjW8QV8/7wPR/KUUZI+7mxR/G1XLh0mvBqRv057aJLLC1
+    06GljVU8/CH7JTvSbGRffyPEPF4pFVnHm4TZlkpODXRzddCwFyJJwPa4BPhen40a
+    y/jpDsIEhcCbHjkuTnAkZYFGd4Lvj77/nhe6y1wt5kFLvEMN3feidkKMM1niSFia
+    F9IXIEM7NAhIG/V218EpPF/lTlpzQRL/zD4yGT5MHQDWVPGdK75d7h9UyUvsrsvJ
+    0c1RWX9dhADTBEEQNqS9WNaofdk5GARxhmLpywIDAQABAoIBADK2CD61gziDC1go
+    2k2/Hf0ibzy1A/0aALVWT0eFTmpAbYHSpcelA9yRoZsIne2jDxNIIEPoFSmONUhH
+    +2iWohKH8wxFBt5GfLRoGXlBM9ekAFngOQBpLUrem3EIB9uMLjrOk/AiC5Vxfp3G
+    v9etb+d1VJ9yx13iKvbxD55USWw9Dq++86uxhmHKwjvGCmiK/XFSnOsM7MpfAO2+
+    E9iC4Zi/TKuDNamzNvlVNhkLe5ERj1S1S1TMC3Rfh/4BAWSIIc1vavRvzX2+ZS/5
+    eW9rFMkUvGv0lutRywFhNBZizkJaG0jn2V0gmuXzEve4y0dyrnH9WYsXwyrmr94U
+    svnIgIECgYEA5FGE34kLFj30fXft5byjynbmbaGuIpmyTEMS6/VtoTs4dqWWFBgM
+    gVJzia6BycLeYC/NMsBJJ3l2vIRE5xb9XVyV64YMlwz8I+paF2ymbGzFGAUzzHbY
+    NGUIxQKu+dehe5NDHZY3UFuS5In05/VHUzvF8EBoVXhXyPKDCRHKZkECgYEAxSct
+    t2LE1moDeVcKJIfvfJHMPXQecsVzoBtDPHyfSkJ6aC8Mo4lGdFIIG1moSlJKZCxI
+    mlW3AqKLzXPlyiENhaNMLOffo4JQjMU/fc8DtB5AbsVX5V32AAy3gDGEsKLqHkjF
+    Fw5/Xv68m7h0d1+sOdJjqcCiCGI30ItL5NbhRQsCgYEArzRLJYoxgtDqM/n7CceX
+    XP+e1dQzH4QYCWOTOpSsmwQp0QpCP4sw1XBjDu1l1WD/aopkCaT6vhr8Xa+WfErt
+    BF7PANxt/t/NAPaOSdlrYFqbaFJdrHIqeRJrB1uG0FyDI6Qe5a5nJfgPoeank/Rp
+    1lpRC4sxRR1DKAXJPgVz7sECgYBvR2jfbKlLmLTzRTSdX/jF6AlO2n7hKx/TS/AM
+    cQ77vEAZFA1fNPmGaFLZFScPJBmHJxOnwR+2Jgcg5PzbtQJL3tr9MbeiM8jBXAg1
+    O6aMgNK/czXkab+TUZo1ij2p8ZqRk2NjWzR7au8MOfXK9z5fuKe2RdtvPfjhBe7F
+    cJ/f9wKBgBoSyRqJO9i9prowAkDnRw2p6ixzz3obLclcRIAJmtEj6aDaVAcsxZPH
+    8UCVH3o5J7OdLNUFHrh13FNjqzkzVSrMpWWQAo6PVkqn354DgzWeQ35pYNhpDeI5
+    oaqHuDrvMwLFZXy166jUi0tJeYddODjc975OjcotU7GoL1Eg0+LV
+    -----END RSA PRIVATE KEY-----
+kind: ConfigMap
+metadata:
+  name: cert
+  namespace: admission-example
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admission-example
+spec:
+  selector:
+    app: admission-example
+  ports:
+  - port: 8080
+    targetPort: 8080
