@@ -1,4 +1,4 @@
-module github.com/naturelr/go-example/tuntap
+module github.com/naturelr/code-example/water
 
 go 1.17
 

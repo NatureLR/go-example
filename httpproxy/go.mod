@@ -1,4 +1,4 @@
-module github.com/naturelr/go-example/httpproxy
+module github.com/naturelr/code-example/httpproxy
 
 go 1.17
 

@@ -1,3 +1,3 @@
-module github.com/naturelr/go-example/tar
+module github.com/naturelr/code-example/tar
 
 go 1.17
