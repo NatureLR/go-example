@@ -1,0 +1,16 @@
+#apiVersion: appx.naturelr.cc/v1
+#kind: Appx
+#metadata:
+#  name: test
+#spec:
+#  image: nginx:latest
+#  port: 80
+#---
+
+apiVersion: appx.naturelr.cc/v1
+kind: Appx
+metadata:
+  name: foo
+spec:
+  image: nginx:latest
+  port: 10087

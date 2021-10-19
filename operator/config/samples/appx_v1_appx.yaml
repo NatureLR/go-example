@@ -1,0 +1,6 @@
+apiVersion: appx.naturelr.cc/v1
+kind: Appx
+metadata:
+  name: appx-sample
+spec:
+  # TODO(user): Add fields here
