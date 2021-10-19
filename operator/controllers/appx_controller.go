@@ -24,6 +24,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -120,34 +121,66 @@ func (r *AppxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 	}
 
-	//if err := r.Get(ctx, req.NamespacedName, deploy); err == nil {
-	//	if client.IgnoreNotFound(err) != nil {
-	//		return ctrl.Result{}, err
-	//	}
-	//	if err := r.Create(ctx, deploy); err != nil {
-	//		return ctrl.Result{}, err
-	//	}
-	//}
-
-	//if err := r.Get(ctx, req.NamespacedName, svc); err != nil {
-	//	if client.IgnoreNotFound(err) != nil {
-	//		return ctrl.Result{}, err
-	//	}
-	//	if err := r.Create(ctx, svc); err != nil {
-	//		return ctrl.Result{}, err
-	//	}
-	//}
-
+	svc := &apiv1.Service{}
+	if err := r.Get(ctx, req.NamespacedName, svc); err != nil {
+		if client.IgnoreNotFound(err) != nil {
+			return ctrl.Result{}, err
+		}
+		if svc.Name == "" {
+			l.Info("创建service:", "名字", appx.Name)
+			svc = &apiv1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      req.Name,
+					Namespace: req.Namespace,
+				},
+				Spec: apiv1.ServiceSpec{
+					Selector: map[string]string{"app": req.Name},
+					Ports: []apiv1.ServicePort{{
+						Port:       int32(appx.Spec.Port),
+						TargetPort: intstr.FromInt(appx.Spec.Port),
+					},
+					},
+				},
+			}
+			// 关联 appx和deployment
+			if err := controllerutil.SetOwnerReference(appx, svc, r.Scheme); err != nil {
+				return ctrl.Result{}, err
+			}
+			if err := r.Create(ctx, svc); err != nil {
+				return ctrl.Result{}, err
+			}
+			l.Info("创建service成功")
+		}
+	}
 	// 目标存在则更新
-	//if !appx.DeletionTimestamp.IsZero() {
-	//	deploy.Finalizers = nil
-	//	svc.Finalizers = nil
-	//	fmt.Println("xxxxxx")
-	//	r.Update(ctx, deploy)
-	//	r.Update(ctx, svc)
-	//	return ctrl.Result{}, nil
-	//}
 
+	// deployment
+	deploy.Spec.Template.Spec.Containers = []apiv1.Container{{
+		Name:  req.Name,
+		Image: appx.Spec.Image,
+		Ports: []apiv1.ContainerPort{
+			{
+				Name:          "http",
+				Protocol:      apiv1.ProtocolTCP,
+				ContainerPort: int32(appx.Spec.Port),
+			}},
+	}}
+	l.Info("更新deployment", "image:", appx.Spec.Image, "port", appx.Spec.Image)
+	if err := r.Update(ctx, deploy); err != nil {
+		return ctrl.Result{}, err
+	}
+	l.Info("deployment更新完成")
+
+	// svc
+	svc.Spec.Ports = []apiv1.ServicePort{{Port: int32(appx.Spec.Port)}}
+
+	l.Info("更新service", "port", appx.Spec.Image)
+	if err := r.Update(ctx, svc); err != nil {
+		return ctrl.Result{}, err
+	}
+	l.Info("service更新完成")
+
+	// 删除
 	return ctrl.Result{}, nil
 }
 
