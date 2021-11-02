@@ -13,4 +13,4 @@ metadata:
   name: foo
 spec:
   image: nginx:latest
-  port: 10086
+  port: 10088

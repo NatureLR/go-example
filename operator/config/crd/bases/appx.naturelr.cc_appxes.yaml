@@ -16,7 +16,14 @@ spec:
     singular: appx
   scope: Namespaced
   versions:
-  - name: v1
+  - additionalPrinterColumns:
+    - jsonPath: .status.workload
+      name: Workload
+      type: integer
+    - jsonPath: .status.svc
+      name: Svc
+      type: string
+    name: v1
     schema:
       openAPIV3Schema:
         description: Appx is the Schema for the appxes API
@@ -36,17 +43,27 @@ spec:
           spec:
             description: AppxSpec defines the desired state of Appx
             properties:
-              foo:
+              image:
                 description: Foo is an example field of Appx. Edit appx_types.go to
                   remove/update
-                type: string
-              image:
                 type: string
               port:
                 type: integer
             type: object
           status:
             description: AppxStatus defines the observed state of Appx
+            properties:
+              svc:
+                type: string
+              workload:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                format: int32
+                type: integer
+            required:
+            - svc
+            - workload
             type: object
         type: object
     served: true

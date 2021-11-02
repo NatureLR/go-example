@@ -29,7 +29,6 @@ type AppxSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Appx. Edit appx_types.go to remove/update
-	Foo   string `json:"foo,omitempty"`
 	Image string `json:"image,omitempty"`
 	Port  int    `json:"port,omitempty"`
 }
@@ -38,8 +37,12 @@ type AppxSpec struct {
 type AppxStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Workload int32  `json:"workload"`
+	Svc      string `json:"svc"`
 }
 
+//+kubebuilder:printcolumn:JSONPath=".status.workload",name=Workload,type=integer
+//+kubebuilder:printcolumn:JSONPath=".status.svc",name=Svc,type=string
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 

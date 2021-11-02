@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -33,12 +34,11 @@ import (
 	appxv1 "github.com/naturelr/code-example/operator/api/v1"
 )
 
-const appxFinalizer = "appx.finalizers.appx.naturelr.cc"
-
 // AppxReconciler reconciles a Appx object
 type AppxReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
+	Recorder record.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=appx.naturelr.cc,resources=appxes,verbs=get;list;watch;create;update;patch;delete
@@ -63,8 +63,8 @@ func (r *AppxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	if err := r.Get(ctx, req.NamespacedName, appx); err != nil {
 		return ctrl.Result{}, err
 	}
+	r.Recorder.Event(appx, apiv1.EventTypeNormal, "找到cr", appx.Name)
 	l.V(0).Info("cr appx:", "port", appx.Spec.Port, "image", appx.Spec.Image)
-
 	// 先获取目标是否存在，已存在则不在重新创建
 	deploy := &appsv1.Deployment{}
 	if err := r.Get(ctx, req.NamespacedName, deploy); err != nil {
@@ -181,6 +181,12 @@ func (r *AppxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	l.Info("service更新完成")
 
 	// 删除
+
+	// 状态更新
+	appx.Status.Workload = *deploy.Spec.Replicas
+	appx.Status.Svc = fmt.Sprintf("%d", svc.Spec.Ports[0].Port)
+	r.Status().Update(ctx, appx)
+
 	return ctrl.Result{}, nil
 }
 
