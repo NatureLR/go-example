@@ -56,9 +56,12 @@ func (node *Node) BreadthFirstSearch() {
 	}
 	result := []int{}
 	nodes := []*Node{node}
+	fmt.Println(nodes[1:], "dfdfd")
 	for len(nodes) > 0 {
+
 		curNode := nodes[0]
 		nodes = nodes[1:]
+
 		result = append(result, curNode.Value)
 		if curNode.Left != nil {
 			nodes = append(nodes, curNode.Left)
@@ -119,6 +122,12 @@ func CreateNode(v int) *Node {
 }
 
 func main() {
+
+	/*
+			3
+		 0    5
+		  2  4
+	*/
 
 	root := Node{Value: 3}
 	root.Left = &Node{}

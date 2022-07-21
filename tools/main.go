@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -158,4 +159,9 @@ func fmtMinute(second string) string {
 	result, _ := strconv.ParseFloat(second, 64)
 	r := result / 60
 	return fmt.Sprintf("%0.0f", r)
+}
+
+// 计算一个大网段能分配多少个小网段
+func cidrTotal(father, child float64) float64 {
+	return math.Pow(2, float64(32-father)) / math.Pow(2, float64(32-child))
 }
