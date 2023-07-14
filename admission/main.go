@@ -154,6 +154,8 @@ func mutate(w http.ResponseWriter, r *http.Request) {
 	patch, err := json.Marshal([]patchOperation{p})
 	checkErr(err)
 
+	_ = qar.Request.UserInfo.Username
+
 	// 返回给k8s的消息
 	are := &admissionv1.AdmissionReview{
 		TypeMeta: apimetav1.TypeMeta{
