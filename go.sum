@@ -1,4 +1,0 @@
-github.com/cybozu-go/log v1.6.1 h1:m5cllWuOckvyLpH3TJAOMC76dydP6fVFjtrU/9NhQUA=
-github.com/cybozu-go/log v1.6.1/go.mod h1:U342hYYWUxWPOw0g5EhiS5BaO/c8c5YT+A14xQRbEd8=
-github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
-github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=

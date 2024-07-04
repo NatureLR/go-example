@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nginx
   labels:
-    admission: test
+    #admission: test
 spec:
   selector:
     matchLabels:
@@ -28,7 +28,7 @@ kind: Service
 metadata:
   name: nginx
   labels:
-    admission: test
+    # admission: test
 spec:
   selector:
     app: nginx

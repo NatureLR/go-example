@@ -1,10 +1,10 @@
-FROM golang:1.16.3-alpine3.13 as build
+FROM golang:1.20-alpine as build
 
 WORKDIR /root
 
 COPY . .
 
-RUN go build .
+RUN go build -o admission-example .
 
 FROM alpine
 
